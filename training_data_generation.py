@@ -2,6 +2,9 @@ import numpy as np
 import random
 from tqdm import tqdm
 import math
+import datetime
+import os
+import torch as T
 
 class TrainingDataGeneration:
     def __init__(self, n_arms=10, num_episodes=1000, high_value=10, low_value=1, num_high_vals=2,
@@ -71,13 +74,18 @@ class TrainingDataGeneration:
             # cumulative_reward = self.cumulative_reward_from_episode(episode)
             # episodes.append({'episode': episode, 'cumulative_reward': cumulative_reward, 'probabilities': self.prob_high_value,
             #                      'selected_highs': [trajectory['selected_high'] for trajectory in trajectories], 'arm_types': [trajectory['arm_type'] for trajectory in trajectories]})
-            episodes.append({'episode': episode, 'probabilities': self.prob_high_value})
-        return episodes
+            episodes.append({'episode': T.tensor(episode), 'probabilities': T.tensor(self.prob_high_value)})
+
+        os.makedirs('training_data', exist_ok=True)
+        filename = f"training_data/training_data_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pt"
+        T.save(episodes, filename)
+        return episodes, filename
     
 # Example usage:
+
 generator = TrainingDataGeneration()
-training_data = generator.generate_data()
-print(training_data)
+training_data, filename = generator.generate_data()
+print(f"Training data saved to {filename}")
 
     
 
